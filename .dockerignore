@@ -1,3 +1,4 @@
 .history
 .vscode
 launch_docker.sh
+/RiboDiff/.eggs
