@@ -1,0 +1,10 @@
+*~
+RiboDiff.egg-info/
+build/
+dist/
+src/ribodiff/*.pyc
+tests/*.pyc
+tests/*.txt
+tests/*.pdf
+scripts/*.pyc
+tools/*.pyc

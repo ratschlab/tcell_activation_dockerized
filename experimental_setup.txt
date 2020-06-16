@@ -1,0 +1,12 @@
+Samples,Data_Type,Conditions
+Sample_T0_1_RP,Ribo-Seq,Control
+Sample_T0_2_RP,Ribo-Seq,Control
+Sample_T0_3_RP,Ribo-Seq,Control
+Sample_2hr_2_RP,Ribo-Seq,DrugTreated
+Sample_2hr_3_RP,Ribo-Seq,DrugTreated
+Sample_T0_1_RNA,RNA-Seq,Control
+Sample_T0_2_RNA,RNA-Seq,Control
+Sample_T0_3_RNA,RNA-Seq,Control
+Sample_2hr_1_RNA,RNA-Seq,DrugTreated
+Sample_2hr_2_RNA,RNA-Seq,DrugTreated
+Sample_2hr_3_RNA,RNA-Seq,DrugTreated

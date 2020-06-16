@@ -1,0 +1,17 @@
+bx-python==0.7.3
+certifi==2017.7.27.1
+cycler==0.10.0
+Cython==0.26
+matplotlib==2.1.0
+numpy==1.13.1
+pandas==0.21.0
+patsy==0.4.1
+pyparsing==2.2.0
+pysam==0.11.2.2
+python-dateutil==2.6.1
+pytz==2017.3
+RSeQC==2.6.4
+scipy==1.0.0
+six==1.11.0
+statsmodels==0.8.0
+subprocess32==3.5.0rc1

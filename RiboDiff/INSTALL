@@ -1,0 +1,50 @@
+================
+RiboDiff INSTALL
+================
+
+Before install RiboDiff, make sure the required packages are already installed on your 
+computer. Please refer to README.md file for details regarding which packages are required.
+
+This document shows how to install RiboDiff on your computer. You can either install
+it globally such that every user can use it, or you can install it to your own directory.
+
+For a global install (you need root permissions to do so), go to the package directory and
+execute the following commands:
+
+	python setup.py build
+	python setup.py test (optional step)
+	python setup.py install
+
+Alternatively, for a local install, execute the following commands instead:
+
+	python setup.py build
+	python setup.py test (optional step)
+	python setup.py install --user
+
+This will install RiboDiff to a default location in your home directory. This location 
+can vary for different operating systems. You can also install it to other location by 
+executing:
+
+	python setup.py install --prefix=/PATH/PREFIX
+
+Please replace /PATH/PREFIX with your prefered path where RiboDiff will be installed. 
+Make sure this path exists in your PATHONPATH environment variable. If not, you 
+can edit PATHONPATH in your ~/.bashrc if you are using Linux or ~/.bash_profile if 
+Mac OS X by adding the folowing line:
+
+	export PYTHONPATH=/PATH/PREFIX/lib/python2.7/site-packages/:$PYTHONPATH
+
+To run RiboDiff, all you need is to execute the TE.py in ./scripts directory:
+
+	python ./scripts/TE.py -e <exp_outline.txt> -c <cnt_table.txt> -o <result.txt>
+
+Probably, you may wish to have a test run on the toy data provided within this package 
+after the installation. To do so, simplily excute this command:
+
+	python ./scripts/TE.py -e ./tests/experimental_design.csv -c ./tests/gene_count_table.tab -o ./tests/toy.res.tab -d 0 -r 1 -p 1
+
+You can find the result files with prefix name as toy.res in ./tests directory.
+
+Please use the same TE.py script to run your own data. You can run it from anywhere on your 
+computer by giving the complete path to it. Please find details on how to prepare input data 
+for RiboDiff in MANUAL file in this package.
