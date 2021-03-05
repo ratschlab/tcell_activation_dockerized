@@ -62,7 +62,8 @@ plot_corr <- function(full_df, use_normalized, title){
     corr_raw_df = corr_raw_df[corr_raw_df$sample_ids != "Sample_2hr_1",]                         
     
     get_spearman <- function(in_df){
-        a = cor.test(in_df$RNA, in_df$RP)
+        in_df = subset(in_df, FP != 0)
+        a = cor.test(in_df$RNA, in_df$FP)
         return(c(a$estimate, a$p.value))
     }
     raw_r2 = by(corr_raw_df, list(corr_raw_df$sample_ids), get_spearman)
@@ -70,11 +71,11 @@ plot_corr <- function(full_df, use_normalized, title){
     raw_r2_df_text <- data.frame(text_str = paste("Speaman Rho:", round(raw_r2_df[,1],2), 
                                             "\nP-value significant:", raw_r2_df[,2]<0.05), sample_ids = names(raw_r2))
     
-    gg_raw = ggplot(corr_raw_df, aes(x=RP, y=RNA)) + geom_point() + geom_smooth(method = lm) +
+    gg_raw = ggplot(corr_raw_df, aes(x=log10(FP), y=log10(RNA))) + geom_point() + # geom_smooth(method = lm) +
         facet_wrap(~ sample_ids) + theme_bw() + scale_color_brewer(palette="Dark2") +
-        theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-        ggtitle(title) +
-        geom_text(data=raw_r2_df_text, aes(x = 90, y = 5000000, label = text_str))
+        #theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+        ggtitle(title) + ylim(0, 8) +
+        geom_text(data=raw_r2_df_text, aes(x = 1, y = 7, label = text_str))
     gg_raw
     
     all_compare_df = dcast(full_df,  gene ~ Samples, value.var=cast_var)                          
@@ -93,7 +94,7 @@ plot_corr <- function(full_df, use_normalized, title){
                         c(2, 2, 2))
     gg_full = grid.arrange(rna_rp_corr_plot, full_corr_plot, rp_corr_plot, rna_corr_plot, layout_matrix=layout_matr)
     
-    return(gg_full)
+    return(list(gg_full, gg_raw))
     
 }
 
@@ -124,8 +125,8 @@ plot_volcano <- function(norm_counts_df, gene_names_df, ribodiff_df, translate_d
     
     ribodiff_df_trans = translate_table(ribodiff_df, translate_df)
     
-    mean_expr_RP_T0 = rowMeans(norm_counts_df[,c("Sample_T0_1_RP",   "Sample_T0_2_RP",   "Sample_T0_3_RP")])
-    mean_expr_RP_2hr = rowMeans(norm_counts_df[,c("Sample_2hr_2_RP",  "Sample_2hr_3_RP")])
+    mean_expr_RP_T0 = rowMeans(norm_counts_df[,c("Sample_T0_1_FP",   "Sample_T0_2_FP",   "Sample_T0_3_FP")])
+    mean_expr_RP_2hr = rowMeans(norm_counts_df[,c("Sample_2hr_2_FP",  "Sample_2hr_3_FP")])
     mean_expr_RP = data.frame(gene_id = norm_counts_df$gene, T0_mean = mean_expr_RP_T0, hr2_mean = mean_expr_RP_2hr)
     mean_expr_RP = merge(mean_expr_RP, ribodiff_df_trans)
     
@@ -195,15 +196,15 @@ run_qc_analysis <- function(table_file, ribodiff_file, old_ribodiff_file, transl
     
     
     # count_type definition
-    count_type_df = data.frame(Samples = c("Sample_T0_1_RP",   "Sample_T0_2_RP",   "Sample_T0_3_RP",   
-                                           "Sample_2hr_2_RP",  "Sample_2hr_3_RP",  "Sample_T0_1_RNA",  
+    count_type_df = data.frame(Samples = c("Sample_T0_1_FP",   "Sample_T0_2_FP",   "Sample_T0_3_FP",   
+                                           "Sample_2hr_2_FP",  "Sample_2hr_3_FP",  "Sample_T0_1_RNA",  
                                            "Sample_T0_2_RNA",  "Sample_T0_3_RNA",  "Sample_2hr_1_RNA",
                                            "Sample_2hr_2_RNA", "Sample_2hr_3_RNA"),
                                sample_ids = c("Sample_T0_1",   "Sample_T0_2",   "Sample_T0_3",   
                                               "Sample_2hr_2",  "Sample_2hr_3",  "Sample_T0_1",  
                                               "Sample_T0_2",  "Sample_T0_3",  "Sample_2hr_1",
                                               "Sample_2hr_2", "Sample_2hr_3"),
-                               count_type = c(rep("RP",5), rep("RNA", 6)),
+                               count_type = c(rep("FP",5), rep("RNA", 6)),
                                condition = c(rep("T0", 3), rep("2hr", 2), rep("T0", 3), rep("2hr", 3)))
     
     # normalize
@@ -214,8 +215,8 @@ run_qc_analysis <- function(table_file, ribodiff_file, old_ribodiff_file, transl
     ######################                       
     
     # plot PCA 
-    gg_pca_raw_rp = plot_pca(raw_counts_df, count_type_df, count_type="RP", cond_vec=c(rep("T0", 3), rep("2hr", 2)), title_text="PCA Raw RP Counts")
-    gg_pca_norm_rp = plot_pca(norm_counts_df, count_type_df, count_type="RP", cond_vec=c(rep("T0", 3), rep("2hr", 2)), title_text="PCA Normalized RP Counts")
+    gg_pca_raw_rp = plot_pca(raw_counts_df, count_type_df, count_type="FP", cond_vec=c(rep("T0", 3), rep("2hr", 2)), title_text="PCA Raw RP Counts")
+    gg_pca_norm_rp = plot_pca(norm_counts_df, count_type_df, count_type="FP", cond_vec=c(rep("T0", 3), rep("2hr", 2)), title_text="PCA Normalized RP Counts")
     gg_pca_raw_rna = plot_pca(raw_counts_df, count_type_df, count_type="RNA", cond_vec=c(rep("T0", 3), rep("2hr", 3)), title_text="PCA Raw RNA Counts")
     gg_pca_norm_rna = plot_pca(norm_counts_df, count_type_df, count_type="RNA", cond_vec=c(rep("T0", 3), rep("2hr", 3)), title_text="PCA Normalized RNA Counts")
     gg_all_pca = grid.arrange(gg_pca_raw_rp, gg_pca_norm_rp, gg_pca_raw_rna, gg_pca_norm_rna, ncol=2)
@@ -227,9 +228,13 @@ run_qc_analysis <- function(table_file, ribodiff_file, old_ribodiff_file, transl
     gg_all_boxplot = grid.arrange(ribo_rna_boxplot_raw, ribo_rna_boxplot_norm, ncol=1)
     
     # plot correlations between sample types
-    gg_corr_raw = plot_corr(full_df, use_normalized=F, title="Raw Counts Correlation")
+    res = plot_corr(full_df, use_normalized=F, title="Raw Counts Correlation")
+    gg_corr_raw = res[[1]]
+    corr_line_raw = res[[2]]
     gg_corr_norm = plot_corr(full_df, use_normalized=T, title="Normalized Counts Correlation")
-
+    gg_corr_norm = res[[1]]
+    corr_line_norm = res[[2]]
+    
     
     # plot ribodiff expression results
     gg_volcano = plot_volcano(norm_counts_df, gene_names_df, ribodiff_df, translate_df)
@@ -263,6 +268,11 @@ run_qc_analysis <- function(table_file, ribodiff_file, old_ribodiff_file, transl
     outfile = paste(outdir, "qc_plots_RNA_RP_corr_normalized.pdf", sep="")
     ggsave(filename = outfile, plot = gg_corr_norm, width = 12, height=12)
     
+    outfile = paste(outdir, "qc_plots_RNA_RP_corr_line_raw.pdf", sep="")
+    ggsave(filename = outfile, plot = corr_line_raw, width = 12, height=12)
+    outfile = paste(outdir, "qc_plots_RNA_RP_corr_line_normalized.pdf", sep="")
+    ggsave(filename = outfile, plot = corr_line_norm, width = 12, height=12)
+    
     outfile = paste(outdir, "qc_plots_volcano.pdf", sep="")
     ggsave(filename = outfile, plot = gg_volcano, width = 12, height=10)
     
@@ -278,15 +288,15 @@ old_ribodiff_file = "~/Documents/projects/guido/result_15.txt"
 translate_file = "~/Documents/projects/guido/mm10_gene_trans_name.txt"
 outdir = "~/Documents/projects/guido/xpress_out/filtered_15/"
 
-library_size_5 = data.frame(Samples = c("Sample_T0_1_RP",   "Sample_T0_2_RP",   "Sample_T0_3_RP",   
-                                        "Sample_2hr_2_RP",  "Sample_2hr_3_RP",  "Sample_T0_1_RNA",  
+library_size_5 = data.frame(Samples = c("Sample_T0_1_FP",   "Sample_T0_2_FP",   "Sample_T0_3_FP",   
+                                        "Sample_2hr_2_FP",  "Sample_2hr_3_FP",  "Sample_T0_1_RNA",  
                                         "Sample_T0_2_RNA",  "Sample_T0_3_RNA",  "Sample_2hr_1_RNA",
                                         "Sample_2hr_2_RNA", "Sample_2hr_3_RNA"),
                             library_size = c(0.8,  1,     1,     1.4,  1.6,
                                              1.536,  0.984,  1.498,  0.644,  0.844,  1.016))
 
-library_size_10 = data.frame(Samples = c("Sample_T0_1_RP",   "Sample_T0_2_RP",   "Sample_T0_3_RP",   
-                                         "Sample_2hr_2_RP",  "Sample_2hr_3_RP",  "Sample_T0_1_RNA",  
+library_size_10 = data.frame(Samples = c("Sample_T0_1_FP",   "Sample_T0_2_FP",   "Sample_T0_3_FP",   
+                                         "Sample_2hr_2_FP",  "Sample_2hr_3_FP",  "Sample_T0_1_RNA",  
                                          "Sample_T0_2_RNA",  "Sample_T0_3_RNA",  "Sample_2hr_1_RNA",
                                          "Sample_2hr_2_RNA", "Sample_2hr_3_RNA"),
                              library_size = c(0.714,  1,     1,     1.517,  1.714,
@@ -299,8 +309,8 @@ library_size_15 = data.frame(Samples = c("Sample_T0_1_RP",   "Sample_T0_2_RP",  
                              library_size = c(0.7,  0.9,     1,     1.4,  1.5,
                                               1.544,  0.989,  1.538,  0.63,  0.842,  1.011))
 
-library_size_30 = data.frame(Samples = c("Sample_T0_1_RP",   "Sample_T0_2_RP",   "Sample_T0_3_RP",   
-                                         "Sample_2hr_2_RP",  "Sample_2hr_3_RP",  "Sample_T0_1_RNA",  
+library_size_30 = data.frame(Samples = c("Sample_T0_1_FP",   "Sample_T0_2_FP",   "Sample_T0_3_FP",   
+                                         "Sample_2hr_2_FP",  "Sample_2hr_3_FP",  "Sample_T0_1_RNA",  
                                          "Sample_T0_2_RNA",  "Sample_T0_3_RNA",  "Sample_2hr_1_RNA",
                                          "Sample_2hr_2_RNA", "Sample_2hr_3_RNA"),
                              library_size = c(0.5,  1,     1,     1.188,  1.469,
@@ -311,4 +321,33 @@ library_size_30 = data.frame(Samples = c("Sample_T0_1_RP",   "Sample_T0_2_RP",  
 #run_qc_analysis(table_file, ribodiff_file, old_ribodiff_file, translate_file, outdir, library_size_10)
 run_qc_analysis(table_file, ribodiff_file, old_ribodiff_file, translate_file, outdir, library_size_15)
 #run_qc_analysis(table_file, ribodiff_file, old_ribodiff_file, translate_file, outdir, library_size_30)
-    
+
+table_file = "~/Documents/projects/guido/xpress_tables/transcript_xpressFP_usualRNA_filtered_table_15.txt"
+ribodiff_file = "~/Documents/projects/guido/xpress_tables/transcript_xpressFP_usualRNA_filtered_table_15/result_15_85.txt"
+old_ribodiff_file = "~/Documents/projects/guido/xpress_tables/cds_xpressFP_previousRNA_filtered_table_15/result_15_85.txt"
+translate_file = "~/Documents/projects/guido/mm10_gene_trans_name.txt"
+outdir = "~/Documents/projects/guido/xpress_tables/transcript_xpressFP_usualRNA_filtered_table_15/"
+
+library_size_xp = data.frame(Samples = c("Sample_T0_1_FP",   "Sample_T0_2_FP",   "Sample_T0_3_FP",   
+                                         "Sample_2hr_2_FP",  "Sample_2hr_3_FP",  "Sample_T0_1_RNA",  
+                                         "Sample_T0_2_RNA",  "Sample_T0_3_RNA",  "Sample_2hr_1_RNA",
+                                         "Sample_2hr_2_RNA", "Sample_2hr_3_RNA"),
+                             library_size = c(0.667,  0.167,     1,     1.25,  1.5,
+                                              1.52,  0.974,  1.51,  0.642,  0.855,  1.026))
+run_qc_analysis(table_file, ribodiff_file, old_ribodiff_file, translate_file, outdir, library_size_xp)
+
+
+
+table_file = "~/Documents/projects/guido/xpress_tables/cds_xpressFP_xpressRNA_filtered_table_15.txt"
+ribodiff_file = "~/Documents/projects/guido/xpress_tables/cds_xpressFP_xpressRNA_filtered_table_15/result_15_85.txt"
+old_ribodiff_file = "~/Documents/projects/guido/xpress_tables/cds_xpressFP_previousRNA_filtered_table_15/result_15_85.txt"
+translate_file = "~/Documents/projects/guido/mm10_gene_trans_name.txt"
+outdir = "~/Documents/projects/guido/xpress_tables/cds_xpressFP_xpressRNA_filtered_table_15/"
+
+library_size_xp = data.frame(Samples = c("Sample_T0_1_FP",   "Sample_T0_2_FP",   "Sample_T0_3_FP",   
+                                         "Sample_2hr_2_FP",  "Sample_2hr_3_FP",  "Sample_T0_1_RNA",  
+                                         "Sample_T0_2_RNA",  "Sample_T0_3_RNA",  "Sample_2hr_1_RNA",
+                                         "Sample_2hr_2_RNA", "Sample_2hr_3_RNA"),
+                             library_size = c(0.7,  0.9,     1,     1.4,  1.5,
+                                              1.576,  1.006,  1.558,  0.621,  0.83,  0.994))
+run_qc_analysis(table_file, ribodiff_file, old_ribodiff_file, translate_file, outdir, library_size_xp)

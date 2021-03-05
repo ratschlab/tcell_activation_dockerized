@@ -3,8 +3,10 @@
 library(data.table)
 
 ires_ref_file = "~/Documents/projects/guido/annotation/IRES_mouse_human.txt"
-utr_infile = "~/Documents/projects/guido/xpress_out/filtered_15/res_table_utrs.txt"
-motif_res_file = "~/Documents/projects/guido/xpress_out/filtered_15/res_table_motifs.tsv"
+utr_infile = "~/Documents/projects/guido/xpress_tables/transcript_xpressFP_usualRNA_filtered_table_15/res_table_utrs.txt"
+utr_infile = "~/Documents/projects/guido/xpress_tables/cds_xpressFP_xpressRNA_filtered_table_15/res_table_utrs.txt"
+motif_res_file = "~/Documents/projects/guido/xpress_tables/transcript_xpressFP_usualRNA_filtered_table_15/res_table_motifs.tsv"
+motif_res_file = "~/Documents/projects/guido/xpress_tables/cds_xpressFP_xpressRNA_filtered_table_15/res_table_motifs.tsv"
 
 all_utrs = data.frame(fread(utr_infile))
 
@@ -20,6 +22,8 @@ top_idx = grep(top_pat, all_utrs$utr5)
 pyr_pat = "[CT]{9,15}"
 pyr_idx = grep(pyr_pat, all_utrs$utr5)
 
+gc_pat = "[CG]{8}"
+gc_idx = grep(gc_pat, all_utrs$utr5)
 
 ## get IRES genes
 ires_in = data.frame(fread(ires_ref_file, header=F))
@@ -37,5 +41,8 @@ all_utrs$has_ires[ires_idx] = TRUE
 
 all_utrs$has_pyramidine = FALSE
 all_utrs$has_pyramidine[pyr_idx] = TRUE
+
+all_utrs$has_gc = FALSE
+all_utrs$has_gc[gc_idx] = TRUE
 
 write.table(all_utrs, motif_res_file, sep="\t", quote=F, row.names=F)

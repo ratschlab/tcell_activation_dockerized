@@ -151,8 +151,9 @@ get_seq_table <- function(res_table){
 #table_file = args[1]
 #ribodiff_file = args[2]
 #outdir = args[3]
-ribodiff_file = "~/Documents/projects/guido/xpress_out/filtered_15/result_15_85.txt"
-outdir = "~/Documents/projects/guido/xpress_out/filtered_15/"
+ribodiff_file = "~/Documents/projects/guido/xpress_tables/transcript_xpressFP_usualRNA_filtered_table_15/result_15_85.txt"
+ribodiff_file = "~/Documents/projects/guido/xpress_tables/cds_xpressFP_xpressRNA_filtered_table_15/result_15_85.txt"
+outdir = "~/Documents/projects/guido/xpress_tables/cds_xpressFP_xpressRNA_filtered_table_15/"
 translate_file = "~/Documents/projects/guido/mm10_gene_trans_name.txt"
 ires_ref_file = "~/Documents/projects/guido/annotation/IRES_mouse_human.txt"
 
